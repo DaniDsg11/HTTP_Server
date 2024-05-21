@@ -1,5 +1,6 @@
 import * as net from 'net';
 import * as fs from 'fs';
+import { parse } from 'path';
 
 let resources: { [id: string]: any } = {};
 
@@ -11,8 +12,12 @@ const server = net.createServer((socket) => {
     socket.on('data', (data) => {
         const request = data.toString();
         const [method, path, ...rest] = request.split(' ');
-        console.log('Request:', method, path);
-        console.log('Rest:', rest);
+        // Separe path and query
+        const pathWithoutQuery = path.split('/');
+        const endpoint = "/"+pathWithoutQuery[1];
+        const id = pathWithoutQuery[2];
+        console.log('Path:', endpoint);
+        console.log('Request:', method, pathWithoutQuery);
         const rawBody = rest.join(' ');
         const startIndex = rawBody.indexOf('{');
         const endIndex = rawBody.lastIndexOf('}');
@@ -28,7 +33,7 @@ const server = net.createServer((socket) => {
         ];
 
         // Handle endpoints
-        switch (path) {
+        switch (endpoint) {
             case '/':
                 if(method == 'GET') {
                     fs.readFile('contents/index.html', (err, content) => {
@@ -86,6 +91,33 @@ const server = net.createServer((socket) => {
                         };
                         socket.write(`HTTP/1.1 ${response.statusCode}\n${headers.join('\n')}${response.body}`);
                     }
+                    socket.end();
+                } else if (method === 'PUT') {
+                    console.log('PUT');
+                    try {
+                        const parsedJson = JSON.parse(jsonBody);
+                        resources[id] = parsedJson;
+                        const response = {
+                            statusCode: 200,
+                            body: JSON.stringify({ id, data: parsedJson })
+                        };
+                        socket.write(`HTTP/1.1 ${response.statusCode}\n${headers.join('\n')}\n\n${response.body}`);
+                    } catch (error) {
+                        const response = {
+                            statusCode: 400,
+                            body: JSON.stringify({ error: 'Bad Request' })
+                        };
+                        socket.write(`HTTP/1.1 ${response.statusCode}\n${headers.join('\n')}${response.body}`);
+                    }
+                    socket.end();
+                } else if (method === 'DELETE') {
+                    console.log('DELETE');
+                    delete resources[id];
+                    const response = {
+                        statusCode: 204,
+                        body: ''
+                    };
+                    socket.write(`HTTP/1.1 ${response.statusCode}\n${headers.join('\n')}\n\n${response.body}`);
                     socket.end();
                 } else {
                     const response = {
