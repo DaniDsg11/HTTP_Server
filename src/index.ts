@@ -1,4 +1,5 @@
 import * as net from 'net';
+import * as fs from 'fs';
 
 // Create TCP server
 const server = net.createServer((socket) => {
@@ -17,15 +18,32 @@ const server = net.createServer((socket) => {
         // Handle endpoints
         switch (path) {
             case '/':
-                const defaultResponse = {
-                    statusCode: 200,
-                    body: JSON.stringify({ message: 'Welcome to our HTTP server!' })
-                };
-                const rawResponse = `HTTP/1.1 ${defaultResponse.statusCode}\n${headers.join('\n')}${defaultResponse.body}`;
-                socket.write(rawResponse);
-                console.log('Request:', request);
-                console.log('Response:', defaultResponse);
-                console.log('Raw Response:', rawResponse);
+                if(method == 'GET') {
+                    fs.readFile('contents/index.html', (err, content) => {
+                        if (err) {
+                            const response = {
+                                statusCode: 500,
+                                body: JSON.stringify({ error: 'Internal Server Error' })
+                            };
+                            socket.write(`HTTP/1.1 ${response.statusCode}\n${headers.join('\n')}${response.body}`);
+                            socket.end();
+                        } else {
+                            const response = {
+                                statusCode: 200,
+                                body: content.toString(),
+                                contentType: 'text/html'
+                            };
+                            socket.write(`HTTP/1.1 ${response.statusCode}\nContent-Type: ${response.contentType}\n${headers.join('\n')}${response.body}`);
+                            socket.end();
+                        }
+                    });
+                } else {
+                    const response = {
+                        statusCode: 405,
+                        body: JSON.stringify({ error: 'Method Not Allowed' })
+                    };
+                    socket.write(`HTTP/1.1 ${response.statusCode}\n${headers.join('\n')}${response.body}`);
+                }
                 break;
             default:
                 // Return the appropriate error codes if the endpoints are not invoked correctly
@@ -37,7 +55,7 @@ const server = net.createServer((socket) => {
         }
 
         // Close the connection
-        socket.end();
+        // socket.end();
     });
 });
 
