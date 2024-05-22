@@ -2,6 +2,7 @@
   "name": "HTTP_Server",
   "packageManager": "yarn@3.2.1",
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "20.9.0",
     "nodemon": "^3.1.0",
     "ts-node": "10.9.1",
@@ -10,5 +11,8 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts --exec ts-node"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2"
   }
 }
