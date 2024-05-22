@@ -125,7 +125,7 @@ const server = net.createServer((socket) => {
                             console.log('Body: ', jsonBody, '\n');    
                             return;
                         }
-                        console.log('Token: ', token);
+                        // console.log('Token: ', token);
                         try {
                             jwt.verify(token, secret);
                             const id = generateId();
