@@ -96,7 +96,7 @@ const server = net.createServer((socket) => {
                     console.log('Body: ', jsonBody, '\n');
                 }
                 break;
-            case '/resources':
+            case '/f1teams':
                 if (method === 'GET') {
                     // Return list of resources
                     const resourceList = Object.keys(resources).map(id => ({ id, data: resources[id] }));
@@ -225,6 +225,18 @@ const server = net.createServer((socket) => {
                 case '/login':
                     // Do login with JWT
                     // console.log('Login');
+                    if(!jsonBody || method !== 'POST') {
+                        const response = {
+                            statusCode: 400,
+                            body: JSON.stringify({ error: 'Bad Request' })
+                        };
+                        socket.write(`HTTP/1.1 ${response.statusCode}\n${res_headers.join('\n')}${response.body}`);
+                        socket.end();
+                        console.log(new Date().toISOString(), method, endpoint, response.statusCode); 
+                        console.log('Headers: ', req_headers);
+                        console.log('Body: ', jsonBody, '\n');
+                        return;
+                    }
                     const parsedJson = JSON.parse(jsonBody);
                     const { username, password } = parsedJson;
                     // console.log('Username:', username);

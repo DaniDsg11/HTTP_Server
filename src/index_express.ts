@@ -59,7 +59,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // List resources
-app.get('/resources', (req: Request, res: Response) => {
+app.get('/f1teams', (req: Request, res: Response) => {
     const resourceList = Object.keys(resources).map(id => ({ id, data: resources[id] }));
     res.status(200).json(resourceList);
 });
@@ -82,14 +82,14 @@ const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
 };
 
 // Add a new resource
-app.post('/resources', authenticateJWT, (req: Request, res: Response) => {
+app.post('/f1teams', authenticateJWT, (req: Request, res: Response) => {
     const id = generateId();
     resources[id] = req.body;
     res.status(201).json({ id, data: req.body });
 });
 
 // Update a resource
-app.put('/resources/:id', (req: Request, res: Response) => {
+app.put('/f1teams/:id', (req: Request, res: Response) => {
     const { id } = req.params;
     if (resources[id]) {
         resources[id] = req.body;
@@ -100,7 +100,7 @@ app.put('/resources/:id', (req: Request, res: Response) => {
 });
 
 // Delete a resource
-app.delete('/resources/:id', (req: Request, res: Response) => {
+app.delete('/f1teams/:id', (req: Request, res: Response) => {
     const api_key = req.headers['API_KEY'] as string;
     if (!apiKeys.includes(api_key)) {
         res.status(401).json({ error: 'Unauthorized' });
